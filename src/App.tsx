@@ -41,7 +41,7 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center justify-center sm:justify-start gap-2">
-                Fake News Detection <span className="font-light text-slate-400 text-sm">v1.0.4</span>
+                FND <span className="font-light text-slate-400 text-sm">v1.0.4</span>
               </h1>
               <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mt-1">
                 Natural Language Processing & Machine Learning Classification Ecosystem
@@ -108,13 +108,13 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-slate-400">
             <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-            <span>Node target: Express full-stack (Port 3000)</span>
+            <span>Node target: Express full-stack </span>
           </div>
           <div className="text-slate-500 font-sans font-medium hover:text-slate-700 transition-colors uppercase py-1">
             Objective: Automate classification via TF-IDF + Machine Learning
           </div>
           <div className="flex gap-4 sm:gap-6 text-slate-400">
-            <span>Deployed: Vercel / Render</span>
+            <span>Deployed: Vercel </span>
             <span>Acc: 99.12% SVM Bounds</span>
           </div>
         </div>
