@@ -40,11 +40,11 @@ export default function PredictorTab() {
     try {
       if (inferenceMode === "local") {
         setGeminiResult(null);
-        const res = await fetch("/api/predict-compare", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: inputText })
-        });
+       const res = await fetch("/api/predict-compare", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: inputText })
+      });
         if (res.ok) {
           const data = await res.json();
           setLocalResult(data);

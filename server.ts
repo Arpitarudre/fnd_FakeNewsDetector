@@ -343,12 +343,12 @@ if (!text) {
    });
 }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
-    return res.status(401).json({
-      error: "Gemini API key is not configured in the workspace secrets panel."
-    });
-  }
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+if (!apiKey) {
+  return res.status(401).json({
+    error: "Gemini API key missing"
+  });
+}
 
   try {
     const ai = new GoogleGenAI({ apiKey });
