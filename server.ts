@@ -6,14 +6,9 @@
 
 import express from "express";
 import path from "path";
-import { GoogleGenAI } from "@google/genai";
-import dotenv from "dotenv";
 import cors from "cors";
 
-
-
 // Load local environmental variables
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -338,83 +333,6 @@ if (!text) {
       decisionVal: svmZ
     }
   });
-});
-
-// API: Google Gemini Factual Deep Analysis Route
-app.post("/api/gemini-check", async (req, res) => {
-  const text = req.body?.text;
-
-if (!text) {
-   return res.status(400).json({
-      error: "Text input missing"
-   });
-}
-
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
-if (!apiKey) {
-  return res.status(401).json({
-    error: "Gemini API key missing"
-  });
-}
-
-  try {
-    const ai = new GoogleGenAI({ apiKey });
-    
-    // Modern Google GenAI SDK request syntax
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              text: `You are an expert investigative fact-checker and NLP specialist. Analyze the following news text and return a strict, formatted JSON response checking its credibility, stylistic patterns, potential misinformation bias, and factual alignment.
-
-News Text: "${text}"
-
-Your response MUST be wrapped in a single, clean JSON object. Do not add markdown backticks (\`\`\`json) or standard chat wraps. Output exactly a JSON string with the following structure:
-{
-  "verdict": "Fake" | "Real" | "Skeptic/Partially True",
-  "confidence": <float between 0.0 and 1.0>,
-  "stylistic_critique": "A brief 2 paragraph breakdown detailing its narrative structure, emotional leverage, grammar habits, sensationalism indicators (e.g., capitals, loaded verbs, clickbait patterns), and objective reporting markers.",
-  "credibility_markers": [
-     {"marker": "Sensationalist Headline / Objective Tone", "credibility": "High" | "Medium" | "Low", "description": "Short explanation"},
-     {"marker": "Source Referencing", "credibility": "High" | "Medium" | "Low", "description": "Short explanation"}
-  ],
-  "factual_context": "Short statement linking the contents to verified global reports and facts."
-}`
-            }
-          ]
-        }
-      ]
-    });
-
-    const outputText = response.text || "";
-    // Clean raw output text from potential Chat block formats
-    const jsonString = outputText.replace(/```json/g, "").replace(/```/g, "").trim();
-    
-    try {
-      const parsed = JSON.parse(jsonString);
-      return res.json(parsed);
-    } catch {
-      // Fallback in case Gemini outputs natural text
-      return res.json({
-        verdict: "Skeptic/Partially True",
-        confidence: 0.70,
-        stylistic_critique: outputText,
-        credibility_markers: [
-          { marker: "Style Analysis", credibility: "Medium", description: "Completed style breakdown." }
-        ],
-        factual_context: "Grounding details established."
-      });
-    }
-
-  } catch (err: any) {
-    console.error("Gemini Fact Check Error:", err);
-    res.status(500).json({
-      error: `Gemini evaluation failed: ${err.message || err.toString()}`
-    });
-  }
 });
 
 // Vite middleware for development vs static asset loading

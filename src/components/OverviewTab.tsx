@@ -27,22 +27,27 @@ export default function OverviewTab() {
     <div id="overview-tab-root" className="space-y-8">
       {/* Editorial Title & Hero - Clean High Contrast Slate Card */}
       <div className="bg-slate-900 rounded-lg p-8 text-white relative overflow-hidden border border-slate-950">
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-            <Award size={12} /> NLP-ML End-to-End Project
-          </span>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
-            Fake News Detection using Natural Language Processing and Machine Learning
-          </h1>
-          <p className="text-slate-300 text-xs md:text-sm leading-relaxed">
-            Research, train, and deploy an automated text classification ecosystem. This studio matches robust, classical linear high-dimensional vector separators against modern Google Gemini generative model fact-checkers.
-          </p>
-        </div>
-        <div className="absolute right-0 bottom-0 opacity-5 transform translate-x-12 translate-y-12">
-          <Brain size={300} />
-        </div>
-      </div>
+  <div className="relative z-10 max-w-3xl space-y-4">
 
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+      <Award size={12} /> NLP-ML End-to-End Project
+    </span>
+
+    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
+      Fake News Detection using Natural Language Processing and Machine Learning
+    </h1>
+
+    <p className="text-slate-300 text-xs md:text-sm leading-relaxed">
+      Research, train, and deploy an automated text classification ecosystem. From raw data assembly and linguistic preprocessing to vectorization and model evaluation, this project delivers a comprehensive framework for distinguishing real news from fake news with high accuracy and efficiency.
+    </p>
+
+  </div>
+
+  <div className="absolute right-0 bottom-0 opacity-5 transform translate-x-12 translate-y-12">
+    <Brain size={300} />
+  </div>
+
+</div>
       {/* Dataset Statistics Bento Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, idx) => {
@@ -93,7 +98,7 @@ export default function OverviewTab() {
             </span>
             <span className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-900 inline-block"></span>
-              Double validation check with Gemini API
+              5,000 Feature-Optimized Vocabulary Size
             </span>
           </div>
         </div>

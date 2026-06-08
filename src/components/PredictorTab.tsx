@@ -6,8 +6,8 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Brain, Sparkles, AlertTriangle, CheckCircle, RefreshCw, Layers, ArrowRight, CornerDownRight, ThumbsUp, ThumbsDown } from "lucide-react";
-import { PredictCompareResponse, GeminiCheckResponse } from "../types";
+import { Brain, AlertTriangle, CheckCircle, RefreshCw } from "lucide-react";
+import { PredictCompareResponse} from "../types";
 
 export default function PredictorTab() {
   const SAMPLES = [
@@ -26,59 +26,41 @@ export default function PredictorTab() {
   ];
 
   const [inputText, setInputText] = useState(SAMPLES[0].text);
-  const [inferenceMode, setInferenceMode] = useState<"local" | "gemini">("local");
   const [running, setRunning] = useState(false);
   const [localResult, setLocalResult] = useState<PredictCompareResponse | null>(null);
-  const [geminiResult, setGeminiResult] = useState<GeminiCheckResponse | null>(null);
   const [showError, setShowError] = useState<string | null>(null);
 
   const triggerAnalysis = async () => {
-    if (!inputText.trim()) return;
-    setRunning(true);
-    setShowError(null);
+  if (!inputText.trim()) return;
 
-    try {
-      if (inferenceMode === "local") {
-        setGeminiResult(null);
-       const res = await fetch("/api/predict-compare", {
+  setRunning(true);
+  setShowError(null);
+
+  try {
+    const res = await fetch("/api/predict-compare", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: inputText })
-      });
-        if (res.ok) {
-          const data = await res.json();
-          setLocalResult(data);
-        } else {
-          throw new Error("Local model analysis failed on the server.");
-        }
-      } else {
-        setLocalResult(null);
-        const res = await fetch("/api/gemini-check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: inputText })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.error) {
-            setShowError(data.error);
-          } else {
-            setGeminiResult(data);
-          }
-        } else {
-          const errData = await res.json();
-          throw new Error(errData.error || "Gemini generative check failed. Verify API Key.");
-        }
-      }
-    } catch (err: any) {
-      console.error(err);
-      setShowError(err.message || "An unexpected error occurred during prediction.");
-    } finally {
-      setRunning(false);
-    }
-  };
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: inputText,
+      }),
+    });
 
-  return (
+    if (res.ok) {
+      const data = await res.json();
+      setLocalResult(data);
+    } else {
+      throw new Error("Local model analysis failed.");
+    }
+  } catch (err: any) {
+    console.error(err);
+    setShowError(err.message || "Prediction failed");
+  } finally {
+    setRunning(false);
+  }
+};
+return (
     <div id="predictor-tab-root" className="space-y-8">
       {/* Title */}
       <div>
@@ -86,7 +68,7 @@ export default function PredictorTab() {
           <Brain size={18} className="text-slate-800" /> Interactive Predictor Vetting Console
         </h2>
         <p className="text-slate-500 text-xs mt-0.5 font-sans">
-          Type or paste direct news copy, choose between local TF-IDF machine learning models or Gemini factual grounding AI, and test veracity live.
+          Type or paste direct news copy, then trigger the analysis to evaluate the article's authenticity through multiple classic ML models.
         </p>
       </div>
 
@@ -97,45 +79,6 @@ export default function PredictorTab() {
         <div className="lg:col-span-5 space-y-5">
           <div className="bg-white p-5 rounded border border-slate-200 shadow-xs space-y-4">
             
-            {/* Mode Selectors */}
-            <div className="space-y-1.5">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Classifying System</span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  id="inference-local-btn"
-                  onClick={() => {
-                    setInferenceMode("local");
-                    setLocalResult(null);
-                    setGeminiResult(null);
-                    setShowError(null);
-                  }}
-                  className={`py-2 rounded text-xs font-bold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    inferenceMode === "local"
-                      ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  <Brain size={13} /> Classic ML Models
-                </button>
-                <button
-                  id="inference-gemini-btn"
-                  onClick={() => {
-                    setInferenceMode("gemini");
-                    setLocalResult(null);
-                    setGeminiResult(null);
-                    setShowError(null);
-                  }}
-                  className={`py-2 rounded text-xs font-bold border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    inferenceMode === "gemini"
-                      ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  <Sparkles size={13} /> Gemini Expert AI
-                </button>
-              </div>
-            </div>
-
             {/* Presets */}
             <div className="space-y-1.5">
               <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Verify Sample Presets</span>
@@ -220,17 +163,7 @@ export default function PredictorTab() {
                   </div>
                 </div>
 
-                {inferenceMode === "gemini" && (
-                  <div className="bg-amber-50 p-4 rounded text-amber-900 border border-amber-200 text-xs space-y-2 font-sans">
-                    <p className="font-bold">Missing Gemini API Key?</p>
-                    <p className="leading-relaxed text-[11px] text-amber-800">
-                      Google GenAI requests require an authorized key. To supply your own API credentials, set up your key via the <strong>Secrets panel</strong> under the workspace settings.
-                    </p>
-                    <p className="text-[10px] text-amber-700 italic">
-                      Note: You can use the "Classic ML Models" mode entirely offline since its algorithms are fully computed natively inside the Node Express server.
-                    </p>
-                  </div>
-                )}
+                
               </motion.div>
             )}
 
@@ -362,83 +295,8 @@ export default function PredictorTab() {
                 </div>
               </motion.div>
             )}
-
-            {/* 4. Output Gemini check */}
-            {geminiResult && !running && !showError && (
-              <motion.div
-                key="gemini-res"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="space-y-5"
-              >
-                {/* Visual Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
-                  <div>
-                    <span className="text-[9px] uppercase tracking-wider font-mono text-slate-500 font-bold flex items-center gap-1">
-                      <Sparkles size={10} /> Google Gemini AI Generative Audit
-                    </span>
-                    <h3 className="font-bold text-base text-slate-900">Fact-Checking Diagnostics</h3>
-                  </div>
-                  {/* Verdict badge */}
-                  <div>
-                    {geminiResult.verdict === "Real" ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-bold bg-green-50 text-green-800 border border-green-200">
-                        <CheckCircle size={12} /> FACTUAL AUDIT: REAL
-                      </span>
-                    ) : geminiResult.verdict === "Fake" ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-bold bg-red-50 text-red-800 border border-red-200">
-                        <AlertTriangle size={12} /> FACTUAL AUDIT: FAKE
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-bold bg-amber-50 text-amber-850 border border-amber-200">
-                        <AlertTriangle size={12} /> VAGUE / PARTIALLY TRUE
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Stylistic appraisal markdown block */}
-                <div className="space-y-1.5 font-sans">
-                  <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block">Linguistic Narrative Critique</span>
-                  <p className="text-xs text-slate-700 bg-slate-50 p-3.5 rounded leading-relaxed italic border border-slate-200">
-                    "{geminiResult.stylistic_critique}"
-                  </p>
-                </div>
-
-                {/* Credibility Checklist table */}
-                <div className="space-y-1.5 font-sans">
-                  <span className="text-[10px] text-slate-400 font-bold font-mono uppercase tracking-wider block">Credibility Vectors & Quality Checklist</span>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {geminiResult.credibility_markers.map((marker, idx) => (
-                      <div key={idx} className="p-2.5 bg-white border border-slate-200 rounded flex gap-2.5 items-start shadow-xs">
-                        {marker.credibility === "High" ? (
-                          <ThumbsUp size={14} className="text-slate-800 shrink-0 mt-0.5" />
-                        ) : (
-                          <ThumbsDown size={14} className="text-slate-500 shrink-0 mt-0.5" />
-                        )}
-                        <div>
-                          <p className="text-xs font-bold text-slate-900">{marker.marker}</p>
-                          <p className="text-[10px] text-slate-500 leading-normal mt-0.5">{marker.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Factual Context */}
-                {geminiResult.factual_context && (
-                  <div className="bg-slate-50 border border-slate-200 p-3 rounded text-xs leading-relaxed text-slate-800 font-sans flex gap-2">
-                    <CornerDownRight size={14} className="text-slate-600 shrink-0 mt-0.5" />
-                    <p className="text-[11px] font-sans">
-                      <strong>Global Fact Context:</strong> {geminiResult.factual_context}
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
             {/* 5. Placeholder waiting query */}
-            {!localResult && !geminiResult && !running && !showError && (
+            {!localResult && !running && !showError && (
               <div className="h-full py-20 flex flex-col items-center justify-center text-slate-400 italic">
                 <Brain size={24} className="opacity-20 mb-2.5 text-slate-800" />
                 <p className="text-xs font-sans">Vetting terminal is idle.</p>
@@ -450,11 +308,13 @@ export default function PredictorTab() {
 
           {/* Footer informational */}
           <div className="border-t border-slate-200 pt-2 text-[10px] text-slate-400 font-mono flex justify-between tracking-wide mt-4">
-            <span>Inference Target Engine: {inferenceMode === "local" ? "Classic ML Matrices" : "Gemini Generative Node"}</span>
-            <span>Veracity Matrix Bounds</span>
+            <span>
+Inference Target Engine: Classic ML Models
+</span>
           </div>
         </div>
       </div>
     </div>
   );
-}
+  }
+
