@@ -22,9 +22,15 @@ app.use(express.json());
 
 // Parse form data if needed
 app.use(express.urlencoded({ extended: true }));
+app.get("/health", (_, res) => {
+  res.json({
+    status: "running"
+  });
+});
 
 app.use(cors({
-  origin: "*"
+  origin: process.env.FRONTEND_URL || "*",
+  credentials: true
 }));
 
 // List of standard English stopwords for the TS NLP preprocessor
@@ -355,7 +361,7 @@ if (!apiKey) {
     
     // Modern Google GenAI SDK request syntax
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: [
         {
           role: "user",
@@ -420,7 +426,7 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     // production mode static directory serving
-    const distPath = path.join(process.cwd(), "dist");
+    const distPath = path.resolve(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
@@ -431,5 +437,11 @@ async function startServer() {
     console.log(`[✓] Live Dev Server active on http://0.0.0.0:${PORT}`);
   });
 }
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error(err);
 
+  res.status(500).json({
+    error: err.message || "Internal server error"
+  });
+});
 startServer();
