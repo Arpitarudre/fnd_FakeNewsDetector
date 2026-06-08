@@ -6,10 +6,11 @@
 
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import cors from "cors";
+
+
 
 // Load local environmental variables
 dotenv.config();
@@ -361,7 +362,7 @@ if (!apiKey) {
     
     // Modern Google GenAI SDK request syntax
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.5-flash",
       contents: [
         {
           role: "user",
@@ -418,30 +419,40 @@ Your response MUST be wrapped in a single, clean JSON object. Do not add markdow
 
 // Vite middleware for development vs static asset loading
 async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa"
+  if (process.env.NODE_ENV === "development") {
+    const { createServer } = await import("vite");
+
+    const vite = await createServer({
+      server: {
+        middlewareMode: true,
+      },
+      appType: "spa",
     });
+
     app.use(vite.middlewares);
   } else {
-    // production mode static directory serving
     const distPath = path.resolve(process.cwd(), "dist");
+
+    console.log("Serving frontend from:", distPath);
+
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+
+    app.get("*", (_, res) => {
+      res.sendFile(path.resolve(distPath, "index.html"));
     });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[✓] Live Dev Server active on http://0.0.0.0:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   });
 }
+
 app.use((err: any, req: any, res: any, next: any) => {
   console.error(err);
 
   res.status(500).json({
-    error: err.message || "Internal server error"
+    error: err.message || "Internal server error",
   });
 });
+
 startServer();
