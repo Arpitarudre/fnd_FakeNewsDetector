@@ -5,27 +5,21 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Brain, Cpu, Layers, Terminal, Sparkles, BookOpen, ChevronRight, Server, Github, AlertTriangle } from "lucide-react";
-
+import { Brain, BookOpen } from "lucide-react";
 // Submodule imports
 import OverviewTab from "./components/OverviewTab";
-import PreprocessingTab from "./components/PreprocessingTab";
-import TrainingTab from "./components/TrainingTab";
 import PredictorTab from "./components/PredictorTab";
-import CodebaseTab from "./components/CodebaseTab";
 
-type TabId = "overview" | "preprocessing" | "training" | "predictor" | "codebase";
+
+type TabId = "overview" | "predictor";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
 
   const navigationItems = [
     { id: "overview", label: "Overview & Roadmap", icon: BookOpen },
-    { id: "preprocessing", label: "Preprocessing & EDA", icon: Layers },
-    { id: "training", label: "Model Training Center", icon: Cpu },
     { id: "predictor", label: "Predictor Console", icon: Brain },
-    { id: "codebase", label: "Workspace Code", icon: Terminal }
-  ] as const;
+  ];
 
   return (
     <div id="application-root" className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col justify-between">
@@ -95,10 +89,7 @@ export default function App() {
             className="w-full"
           >
             {activeTab === "overview" && <OverviewTab />}
-            {activeTab === "preprocessing" && <PreprocessingTab />}
-            {activeTab === "training" && <TrainingTab />}
             {activeTab === "predictor" && <PredictorTab />}
-            {activeTab === "codebase" && <CodebaseTab />}
           </motion.div>
         </AnimatePresence>
       </main>
